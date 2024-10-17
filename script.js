@@ -146,10 +146,16 @@ class CardDeck {
 		}, 600);
 	}
 
-	sort() {
-		this.possibleCards = this.possibleCards.sort((a, b) =>
-			a.suit > b.suit ? 1 : a.suit === b.suit ? (a.rank > b.rank ? 1 : -1) : -1
-		);
+	sort(isAscOrder) {
+		console.log({isAscOrder})
+		const orderingFunction = isAscOrder ? (a, b) => { 
+			return a.suit > b.suit ? 1 : a.suit === b.suit ? (a.rank > b.rank ? 1 : -1) : -1 
+		} : (a, b) => { 
+			return a.suit > b.suit ? -1 : a.suit === b.suit ? (a.rank > b.rank ? -1 : 1) : 1 
+		}
+		console.log(this.possibleCards);		
+		this.possibleCards = this.possibleCards.sort(orderingFunction);
+		console.log(this.possibleCards);	
 	}
 
 	filter(cardProp = null, values = []) {
@@ -176,6 +182,31 @@ class CardDeck {
 
 // Create a new card deck.
 const deck = new CardDeck(".deck", ".hand");
-
+const params = new URLSearchParams(window.location.search);
+const cardsParam = params.get('cards');
+const suitsParam = params.get('suits');
+const ranksParam = params.get('ranks');
+if (cardsParam) {
+	const cards = cardsParam.split(' ');
+	deck.filter('id', cards);
+}
+if (suitsParam) {
+	const suits = suitsParam.split(' ');
+	deck.filter('suit', suits);
+}
+if (ranksParam) {
+	const ranks = ranksParam.split(' ');
+	const numericRanks = ranks.map(rank => parseInt(rank));
+	deck.filter('rank', numericRanks);
+}
+const limit = params.get('limit');
+if (limit) {
+	const numericLimit = parseInt(limit);
+	deck.limit(4);
+}
+const sorted = params.get('sorted');
+if(sorted && (sorted.toLowerCase() === 'asc' || sorted.toLowerCase() === 'desc')) 
+	deck.sort(sorted === 'asc')
+deck.drawFiltered();
 // Take a look at the deck object and its methods.
-console.log(deck);
+//console.log(deck);
