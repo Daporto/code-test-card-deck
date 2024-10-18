@@ -146,16 +146,19 @@ class CardDeck {
 		}, 600);
 	}
 
-	sort(isAscOrder) {
-		console.log({isAscOrder})
-		const orderingFunction = isAscOrder ? (a, b) => { 
-			return a.suit > b.suit ? 1 : a.suit === b.suit ? (a.rank > b.rank ? 1 : -1) : -1 
-		} : (a, b) => { 
-			return a.suit > b.suit ? -1 : a.suit === b.suit ? (a.rank > b.rank ? -1 : 1) : 1 
+	sort(order) {
+		const sortingAux = {
+			asc: {
+				whenIsBigger: 1,
+				whenIsSmaller: -1
+			},
+			desc: {
+				whenIsBigger: -1,
+				whenIsSmaller: 1
+			}
 		}
-		console.log(this.possibleCards);		
+		const orderingFunction = (a,b) => a.suit > b.suit ? sortingAux[order].whenIsBigger : a.suit === b.suit ? (a.rank > b.rank ? sortingAux[order].whenIsBigger : sortingAux[order].whenIsSmaller) : sortingAux[order].whenIsSmaller;
 		this.possibleCards = this.possibleCards.sort(orderingFunction);
-		console.log(this.possibleCards);	
 	}
 
 	filter(cardProp = null, values = []) {
@@ -186,27 +189,31 @@ const params = new URLSearchParams(window.location.search);
 const cardsParam = params.get('cards');
 const suitsParam = params.get('suits');
 const ranksParam = params.get('ranks');
+const sorted = params.get('sorted');
+const limit = params.get('limit');
+let drawFiltered = false;
 if (cardsParam) {
 	const cards = cardsParam.split(' ');
 	deck.filter('id', cards);
+	drawFiltered = true;
 }
 if (suitsParam) {
 	const suits = suitsParam.split(' ');
 	deck.filter('suit', suits);
+	drawFiltered = true;
 }
 if (ranksParam) {
 	const ranks = ranksParam.split(' ');
 	const numericRanks = ranks.map(rank => parseInt(rank));
 	deck.filter('rank', numericRanks);
+	drawFiltered = true;
 }
-const limit = params.get('limit');
 if (limit) {
 	const numericLimit = parseInt(limit);
-	deck.limit(4);
+	deck.limit(numericLimit);
 }
-const sorted = params.get('sorted');
 if(sorted && (sorted.toLowerCase() === 'asc' || sorted.toLowerCase() === 'desc')) 
-	deck.sort(sorted === 'asc')
-deck.drawFiltered();
+	deck.sort(sorted.toLowerCase());
+if(drawFiltered) deck.drawFiltered();
 // Take a look at the deck object and its methods.
-//console.log(deck);
+console.log(deck);
